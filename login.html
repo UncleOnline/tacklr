@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Kanban Board with Claude GTD Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+        
+        .login-header {
+            background-color: #3498db;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .login-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .login-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .login-form {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .login-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .login-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .login-options a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .login-options a:hover {
+            text-decoration: underline;
+        }
+        
+        .demo-notice {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .register-section {
+            border-top: 1px solid #eee;
+            padding: 20px 30px;
+            text-align: center;
+            background-color: #fafafa;
+        }
+        
+        .register-btn {
+            background-color: transparent;
+            color: #3498db;
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .register-btn:hover {
+            background-color: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1><i class="fas fa-tasks"></i> Kanban GTD</h1>
+            <p>with Claude AI Assistant</p>
+        </div>
+        
+        <div class="login-form">
+            <div id="error-message" class="error-message">
+                Invalid username or password. Please try again.
+            </div>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter your username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+            
+            <button id="login-btn" class="login-btn">Sign In</button>
+            
+            <div class="login-options">
+                <label>
+                    <input type="checkbox" id="remember-me"> Remember me
+                </label>
+                <a href="#">Forgot password?</a>
+            </div>
+            
+            <div class="demo-notice">
+                <p>For demo: use any username and password</p>
+            </div>
+        </div>
+        
+        <div class="register-section">
+            <p>Don't have an account?</p>
+            <button id="register-btn" class="register-btn">Create Account</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const errorMessage = document.getElementById('error-message');
+            const rememberMe = document.getElementById('remember-me');
+            
+            // Check if user is already logged in
+            const isLoggedIn = localStorage.getItem('kanban_user_logged_in');
+            if (isLoggedIn === 'true') {
+                window.location.href = 'index.html';
+            }
+            
+            // Handle login
+            loginBtn.addEventListener('click', function() {
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value;
+                
+                if (username && password) {
+                    // For a simple demo, any username/password works
+                    // In a real app, you would validate against a database
+                    
+                    // Store user info
+                    if (rememberMe.checked) {
+                        localStorage.setItem('kanban_username', username);
+                    }
+                    
+                    // Set logged in flag
+                    localStorage.setItem('kanban_user_logged_in', 'true');
+                    localStorage.setItem('kanban_current_user', username);
+                    
+                    // Create user-specific storage key for tasks
+                    const userStorageKey = `kanban_board_tasks_${username}`;
+                    
+                    // Initialize empty board if user is new
+                    if (!localStorage.getItem(userStorageKey)) {
+                        const emptyBoard = {
+                            inbox: [],
+                            actions: [],
+                            projects: [],
+                            'someday-maybe': []
+                        };
+                        localStorage.setItem(userStorageKey, JSON.stringify(emptyBoard));
+                    }
+                    
+                    // Redirect to app
+                    window.location.href = 'index.html';
+                } else {
+                    // Show error
+                    errorMessage.style.display = 'block';
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 3000);
+                }
+            });
+            
+            // Handle registration (same as login in this simple version)
+            registerBtn.addEventListener('click', function() {
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value;
+                
+                if (username && password) {
+                    // For this simple demo, register works like login
+                    localStorage.setItem('kanban_user_logged_in', 'true');
+                    localStorage.setItem('kanban_current_user', username);
+                    
+                    // Create user-specific storage
+                    const userStorageKey = `kanban_board_tasks_${username}`;
+                    const emptyBoard = {
+                        inbox: [],
+                        actions: [],
+                        projects: [],
+                        'someday-maybe': []
+                    };
+                    localStorage.setItem(userStorageKey, JSON.stringify(emptyBoard));
+                    
+                    // Redirect to app
+                    window.location.href = 'index.html';
+                } else {
+                    // Show error
+                    errorMessage.style.display = 'block';
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 3000);
+                }
+            });
+            
+            // Enter key to submit
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    loginBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
